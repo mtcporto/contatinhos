@@ -1,0 +1,22 @@
+{
+  "name": "contatinhos",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3002",
+    "build": "next build",
+    "start": "next start -p 3002",
+    "setup": "node setup-db.mjs"
+  },
+  "dependencies": {
+    "@libsql/client": "^0.17.3",
+    "lucide-react": "^0.525.0",
+    "next": "15.3.4",
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
+  },
+  "devDependencies": {
+    "eslint": "^9",
+    "eslint-config-next": "15.3.4"
+  }
+}
