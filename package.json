@@ -17,6 +17,12 @@
   },
   "devDependencies": {
     "eslint": "^9",
-    "eslint-config-next": "15.5.27"
+    "eslint-config-next": "15.5.27",
+    "fast-glob": "file:vendor/next-eslint-glob"
+  },
+  "overrides": {
+    "@next/eslint-plugin-next": {
+      "fast-glob": "$fast-glob"
+    }
   }
 }
