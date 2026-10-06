@@ -46,7 +46,11 @@ export async function verifyPassword(password, stored) {
 
 // ── Session tokens (HMAC-SHA256) ──────────────────────────────────────────────
 function getSecret() {
-  return process.env.SESSION_SECRET || "contatinhos-dev-secret-CHANGE-IN-PROD";
+  const secret = process.env.SESSION_SECRET;
+  if (!secret || secret.length < 32) {
+    throw new Error("SESSION_SECRET must be configured with at least 32 characters");
+  }
+  return secret;
 }
 
 async function getHMACKey(secret) {
@@ -72,14 +76,17 @@ export async function createToken(payload) {
 export async function verifyToken(token) {
   if (!token) return null;
   try {
-    const [encoded, sigHex] = token.split(".");
+    const parts = token.split(".");
+    if (parts.length !== 2) return null;
+    const [encoded, sigHex] = parts;
     if (!encoded || !sigHex) return null;
     const key = await getHMACKey(getSecret());
-    const expectedSig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(encoded));
-    const expectedHex = Buffer.from(expectedSig).toString("base64url");
-    if (sigHex !== expectedHex) return null;
+    const valid = await crypto.subtle.verify("HMAC", key,
+      Buffer.from(sigHex, "base64url"), new TextEncoder().encode(encoded));
+    if (!valid) return null;
     const payload = JSON.parse(Buffer.from(encoded, "base64url").toString());
-    if (payload.expiresAt < Date.now()) return null;
+    if (!Number.isSafeInteger(payload.expiresAt) || payload.expiresAt <= Date.now() ||
+        payload.expiresAt > Date.now() + SESSION_DURATION_MS) return null;
     return payload;
   } catch {
     return null;
